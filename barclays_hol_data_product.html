@@ -640,56 +640,34 @@ UNION ALL SELECT 'OPERATIONAL_ALERTS', COUNT(*) FROM OPERATIONAL_ALERTS;</code><
                             <button onclick="copyCode(this)" title="Copy prompt"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
                         </div>
                     </div>
-                    <pre><code>Create a dbt project called barclays_payments that builds 3 models in BARCLAYS_HOL.ANALYTICS schema. Use BARCLAYS_WH warehouse. Here is the EXACT specification:
+                    <pre><code>Create a dbt project called barclays_payments that builds 3 models in BARCLAYS_HOL.ANALYTICS schema. Use BARCLAYS_WH warehouse.
+
+Source tables are in BARCLAYS_HOL.RAW_DATA:
+- PAYMENTS (PAYMENT_ID, PAYMENT_DATE, ORIGINATOR_NAME, BENEFICIARY_NAME, PAYMENT_TYPE, CHANNEL, CURRENCY, AMOUNT, STATUS, PROCESSING_TIME_MS, ERROR_CODE, REGION)
+- SLA_DEFINITIONS (SLA_ID, SLA_NAME, PAYMENT_TYPE, MAX_PROCESSING_TIME_MS, TARGET_SUCCESS_RATE)
 
 MODEL 1: stg_payments (materialized as table)
-Source: BARCLAYS_HOL.RAW_DATA.PAYMENTS
-Output columns (use these EXACT names):
-  - PAYMENT_ID (VARCHAR, from PAYMENT_ID)
-  - PAYMENT_DATE (TIMESTAMP, from PAYMENT_DATE)
-  - PAYMENT_TYPE (VARCHAR, UPPER(PAYMENT_TYPE))
-  - CHANNEL (VARCHAR, UPPER(CHANNEL))
-  - CURRENCY (VARCHAR)
-  - AMOUNT (NUMBER(15,2), cast from AMOUNT)
-  - STATUS (VARCHAR, UPPER(STATUS))
-  - PROCESSING_TIME_MS (NUMBER, from PROCESSING_TIME_MS)
-  - REGION (VARCHAR, UPPER(REGION))
-  - IS_SUCCESSFUL (BOOLEAN, = TRUE when STATUS = 'COMPLETED')
-  - IS_FAILED (BOOLEAN, = TRUE when STATUS = 'FAILED')
+Clean and standardise the PAYMENTS table. Output columns must be named EXACTLY:
+  PAYMENT_ID, PAYMENT_DATE, PAYMENT_TYPE, CHANNEL, CURRENCY, AMOUNT, STATUS, PROCESSING_TIME_MS, REGION, IS_SUCCESSFUL, IS_FAILED
+- Uppercase all string columns
+- IS_SUCCESSFUL = true when payment completed, IS_FAILED = true when payment failed
+- Cast AMOUNT to NUMBER(15,2)
 
 MODEL 2: mart_payment_kpis (materialized as table)
-Source: ref('stg_payments')
-Group by: DATE_TRUNC('DAY', PAYMENT_DATE) AS PAYMENT_DATE, PAYMENT_TYPE, REGION
-Output columns (use these EXACT names):
-  - PAYMENT_DATE
-  - PAYMENT_TYPE
-  - REGION
-  - TOTAL_PAYMENTS (COUNT(*))
-  - TOTAL_VOLUME (SUM(AMOUNT))
-  - SUCCESS_RATE_PCT (ROUND(COUNT_IF(IS_SUCCESSFUL)::FLOAT / COUNT(*) * 100, 2))
-  - AVG_PROCESSING_TIME_MS (ROUND(AVG(PROCESSING_TIME_MS), 0))
-  - P95_PROCESSING_TIME_MS (ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY PROCESSING_TIME_MS), 0))
+Aggregate daily KPIs from stg_payments grouped by day, payment type, and region. Output columns must be named EXACTLY:
+  PAYMENT_DATE, PAYMENT_TYPE, REGION, TOTAL_PAYMENTS, TOTAL_VOLUME, SUCCESS_RATE_PCT, AVG_PROCESSING_TIME_MS, P95_PROCESSING_TIME_MS
+- PAYMENT_DATE should be the day (truncated from timestamp)
+- TOTAL_VOLUME is total monetary value
+- SUCCESS_RATE_PCT is percentage of successful payments (0-100)
+- P95 is the 95th percentile processing time
 
 MODEL 3: mart_sla_compliance (materialized as table)
-Source: ref('mart_payment_kpis') JOIN BARCLAYS_HOL.RAW_DATA.SLA_DEFINITIONS ON PAYMENT_TYPE = PAYMENT_TYPE
-Output columns (use these EXACT names):
-  - PAYMENT_DATE (from mart_payment_kpis)
-  - PAYMENT_TYPE (from mart_payment_kpis)
-  - REGION (from mart_payment_kpis)
-  - SUCCESS_RATE_PCT (from mart_payment_kpis)
-  - P95_PROCESSING_TIME_MS (from mart_payment_kpis)
-  - SLA_TARGET_SUCCESS_RATE (from SLA_DEFINITIONS.TARGET_SUCCESS_RATE)
-  - MAX_PROCESSING_TIME_MS (from SLA_DEFINITIONS.MAX_PROCESSING_TIME_MS)
-  - SLA_STATUS (CASE:
-      'COMPLIANT' when SUCCESS_RATE_PCT >= SLA_TARGET_SUCCESS_RATE AND P95_PROCESSING_TIME_MS <= MAX_PROCESSING_TIME_MS,
-      'AT RISK' when SUCCESS_RATE_PCT >= SLA_TARGET_SUCCESS_RATE * 0.95,
-      else 'BREACH')
+Join mart_payment_kpis to RAW_DATA.SLA_DEFINITIONS on payment type. Output columns must be named EXACTLY:
+  PAYMENT_DATE, PAYMENT_TYPE, REGION, SUCCESS_RATE_PCT, P95_PROCESSING_TIME_MS, SLA_TARGET_SUCCESS_RATE, MAX_PROCESSING_TIME_MS, SLA_STATUS
+- SLA_TARGET_SUCCESS_RATE comes from SLA_DEFINITIONS.TARGET_SUCCESS_RATE
+- SLA_STATUS should be 'COMPLIANT' if both success rate meets target AND processing time meets SLA, 'AT RISK' if close to target, or 'BREACH' if failing
 
-Configuration:
-- dbt_project.yml with project name barclays_payments
-- profiles.yml targeting snowflake, database BARCLAYS_HOL, warehouse BARCLAYS_WH
-- schema.yml with not_null tests on key columns and accepted_values test on SLA_STATUS ('COMPLIANT', 'AT RISK', 'BREACH')
-
+Include dbt_project.yml, profiles.yml for Snowflake, and schema.yml with tests.
 After generating all files, run dbt run and dbt test.</code></pre>
                 </div>
 
@@ -1128,6 +1106,14 @@ LIMIT 5;</code></pre>
                     </div>
                 </div>
 
+                <h3 style="margin: 1.5rem 0 0.75rem;">4.1 &mdash; Sentiment Analysis with CORTEX.SENTIMENT()</h3>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;"><strong>What it does:</strong> Takes any text and returns a score from <strong>-1.0</strong> (very negative) to <strong>+1.0</strong> (very positive). It runs a pre-trained NLP model &mdash; no fine-tuning, no training data, no setup.</p>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;"><strong>Why we use it here:</strong> Customer feedback is unstructured text. Manually reading 2,000 feedback entries is impractical. Sentiment scoring lets operations teams instantly surface the most negative feedback, spot deteriorating trends, and correlate sentiment with payment types or channels.</p>
+
+                <h3 style="margin: 1rem 0 0.5rem;">4.1b &mdash; Topic Classification with CORTEX.CLASSIFY_TEXT()</h3>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;"><strong>What it does:</strong> Given a text input and a list of candidate categories, it returns the best-matching category and a confidence score. You define the categories &mdash; no training required.</p>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;"><strong>Why we use it here:</strong> Feedback arrives without a &ldquo;reason&rdquo; field. Instead of building a manual taxonomy, we let the model classify each entry into operational categories (Performance Issue, Service Quality, etc.) so teams can route and prioritise without reading every message.</p>
+
                 <div class="code-block" data-language="sql">
                     <div class="code-header">
                         <span class="code-language">SQL</span>
@@ -1180,6 +1166,10 @@ SELECT FEEDBACK_TEXT, SENTIMENT_SCORE, SENTIMENT_LABEL, TOPIC_CATEGORY
 FROM FEEDBACK_ENRICHED LIMIT 10;</code></pre>
                 </div>
 
+                <h3 style="margin: 1.5rem 0 0.75rem;">4.2 &mdash; LLM-Generated Recommendations with CORTEX.COMPLETE()</h3>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;"><strong>What it does:</strong> Sends a prompt to a large language model (here, <code>mistral-large2</code>) and returns generated text. You can use any Cortex-supported model. The LLM has no access to your data beyond what you include in the prompt.</p>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;"><strong>Why we use it here:</strong> When a high-severity alert fires, ops teams need recommended next steps. Instead of maintaining a static runbook, COMPLETE() generates context-aware recommendations dynamically based on the alert description, payment type, and severity. This augments human decision-making &mdash; the team still decides what to do, but gets an instant AI-suggested starting point.</p>
+
                 <div class="code-block" data-language="sql">
                     <div class="code-header">
                         <span class="code-language">SQL</span>
@@ -1206,6 +1196,10 @@ WHERE a.STATUS = 'OPEN'
   AND a.SEVERITY IN ('HIGH', 'CRITICAL')
 LIMIT 5;</code></pre>
                 </div>
+
+                <h3 style="margin: 1.5rem 0 0.75rem;">4.3 &mdash; Aggregating AI Outputs for Operational Insight</h3>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;"><strong>What we're doing:</strong> The AI functions above enriched individual rows. Now we aggregate those AI-generated columns just like any other data &mdash; grouping sentiment by payment type to answer: &ldquo;Which payment schemes are generating the most negative customer feedback?&rdquo;</p>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;">This is the power of in-database AI: the outputs are regular columns that flow into your existing SQL pipelines, dashboards, and alerting.</p>
 
                 <div class="code-block" data-language="sql">
                     <div class="code-header">
