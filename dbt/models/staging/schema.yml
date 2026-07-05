@@ -1,0 +1,50 @@
+-- models/staging/schema.yml
+-- Source and model documentation + tests
+
+version: 2
+
+sources:
+  - name: raw_data
+    database: BARCLAYS_HOL
+    schema: RAW_DATA
+    tables:
+      - name: payments
+        description: Raw payment transactions from the payments processing system
+      - name: customer_feedback
+        description: Customer feedback collected across all channels
+      - name: sla_definitions
+        description: SLA thresholds per payment type
+
+models:
+  - name: stg_payments
+    description: Cleaned and type-cast payments data with derived boolean flags
+    columns:
+      - name: payment_id
+        description: Unique payment identifier
+        tests:
+          - not_null
+          - unique
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['COMPLETED','PENDING','FAILED','RETURNED']
+      - name: payment_type
+        tests:
+          - accepted_values:
+              values: ['SWIFT','BACS','CHAPS','FASTER PAYMENTS','SEPA','WIRE TRANSFER']
+      - name: amount
+        tests:
+          - not_null
+
+  - name: stg_feedback
+    description: Cleaned customer feedback with satisfaction tier
+    columns:
+      - name: feedback_id
+        tests:
+          - not_null
+          - unique
+      - name: rating
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]

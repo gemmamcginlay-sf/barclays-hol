@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barclays: Building a Data Product with Cortex AI | Snowflake Hands-On Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="https://www.logo.wine/a/logo/Snowflake_Inc./Snowflake_Inc.-Logo.wine.svg">
+    <style>
+:root {
+    --sf-blue-primary: #29B5E8;
+    --sf-blue-dark: #1565C0;
+    --sf-blue-light: #E3F2FD;
+    --sf-green: #51cf66;
+    --sf-red: #ff6b6b;
+    --sf-yellow: #ffd43b;
+    --sf-orange: #ff922b;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4rem;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+    --header-height: 64px;
+    --sidebar-width: 280px;
+    --content-max-width: 900px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-height) + var(--space-lg)); }
+body { font-family: var(--font-family); font-size: 16px; line-height: 1.6; color: var(--gray-800); background-color: var(--gray-50); -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; height: auto; }
+a { color: var(--sf-blue-primary); text-decoration: none; transition: color var(--transition-fast); }
+a:hover { color: var(--sf-blue-dark); }
+
+.hol-header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-height); background: white; border-bottom: 1px solid var(--gray-200); z-index: 100; box-shadow: var(--shadow-sm); }
+.header-container { max-width: 1400px; margin: 0 auto; height: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--space-xl); }
+.logo-section { display: flex; align-items: center; gap: var(--space-md); }
+.snowflake-logo { height: 40px; width: auto; }
+.logo-divider { width: 1px; height: 24px; background: var(--gray-300); }
+.hol-badge { background: linear-gradient(135deg, var(--sf-blue-primary), var(--sf-blue-dark)); color: white; padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { color: var(--gray-600); font-weight: 500; font-size: 0.875rem; padding: var(--space-sm); border-radius: var(--radius-sm); transition: all var(--transition-fast); }
+.header-nav a:hover { color: var(--sf-blue-primary); background: var(--sf-blue-light); }
+
+.hero-section { margin-top: var(--header-height); background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%); padding: var(--space-3xl) 0; color: white; }
+.hero-container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-xl); display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3xl); align-items: center; }
+.industry-tag { display: inline-block; background: rgba(41, 181, 232, 0.2); color: var(--sf-blue-primary); padding: var(--space-xs) var(--space-md); border-radius: var(--radius-full); font-size: 0.875rem; font-weight: 500; margin-bottom: var(--space-md); }
+.hero-title { font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: var(--space-md); }
+.hero-subtitle { font-size: 1.125rem; color: var(--gray-300); margin-bottom: var(--space-xl); line-height: 1.7; }
+.hero-meta { display: flex; gap: var(--space-xl); margin-bottom: var(--space-xl); }
+.meta-item { display: flex; align-items: center; gap: var(--space-sm); color: var(--gray-400); font-size: 0.875rem; }
+.meta-icon { width: 18px; height: 18px; fill: currentColor; }
+.hero-cta { display: inline-flex; align-items: center; gap: var(--space-sm); background: var(--sf-blue-primary); color: white; padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 600; transition: all var(--transition-fast); }
+.hero-cta:hover { background: var(--sf-blue-dark); color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(41, 181, 232, 0.4); }
+.architecture-preview { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-lg); padding: var(--space-xl); backdrop-filter: blur(10px); font-family: var(--font-mono); font-size: 0.8rem; color: var(--gray-300); white-space: pre-line; }
+
+.content-section { padding: var(--space-3xl) 0; }
+.content-section.alt-bg { background: white; }
+.section-container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-xl); }
+.section-title { font-size: 1.75rem; font-weight: 700; color: var(--gray-900); margin-bottom: var(--space-xl); position: relative; padding-bottom: var(--space-md); }
+.section-title::after { content: ''; position: absolute; bottom: 0; left: 0; width: 60px; height: 4px; background: linear-gradient(90deg, var(--sf-blue-primary), var(--sf-blue-dark)); border-radius: var(--radius-full); }
+
+.overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
+.overview-card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--space-xl); transition: all var(--transition-fast); }
+.overview-card:hover { border-color: var(--sf-blue-primary); box-shadow: var(--shadow-md); }
+.overview-card.highlight { background: linear-gradient(135deg, var(--sf-blue-light), white); border-color: var(--sf-blue-primary); }
+.overview-card h3 { font-size: 1rem; font-weight: 600; color: var(--gray-700); margin-bottom: var(--space-md); }
+.learning-list { list-style: none; }
+.learning-list li { position: relative; padding-left: var(--space-lg); margin-bottom: var(--space-sm); color: var(--gray-600); }
+.learning-list li::before { content: ''; position: absolute; left: 0; top: 8px; width: 8px; height: 8px; background: var(--sf-blue-primary); border-radius: 50%; }
+.tech-tags { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+.tech-tag { display: inline-flex; align-items: center; gap: var(--space-xs); background: var(--gray-100); padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-sm); font-size: 0.8125rem; color: var(--gray-700); }
+
+.progress-tracker { position: fixed; left: 0; top: var(--header-height); bottom: 0; width: var(--sidebar-width); background: white; border-right: 1px solid var(--gray-200); padding: var(--space-xl); overflow-y: auto; z-index: 50; }
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md); font-weight: 600; color: var(--gray-700); }
+.progress-percent { color: var(--sf-blue-primary); }
+.progress-bar { height: 6px; background: var(--gray-200); border-radius: var(--radius-full); margin-bottom: var(--space-xl); overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--sf-blue-primary), var(--sf-green)); border-radius: var(--radius-full); width: 0%; transition: width var(--transition-normal); }
+.steps-nav { display: flex; flex-direction: column; gap: var(--space-xs); }
+.step-nav-item { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-md); color: var(--gray-600); font-size: 0.8rem; transition: all var(--transition-fast); text-decoration: none; cursor: pointer; }
+.step-nav-item:hover { background: var(--gray-100); color: var(--gray-800); }
+.step-nav-item.active { background: var(--sf-blue-light); color: var(--sf-blue-dark); font-weight: 500; }
+.step-nav-item.completed { color: var(--sf-green); }
+
+.steps-container { margin-left: var(--sidebar-width); padding: var(--space-2xl); }
+.step-card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); margin-bottom: var(--space-xl); overflow: hidden; transition: all var(--transition-fast); }
+.step-card:hover { box-shadow: var(--shadow-md); }
+.step-card.completed { border-color: var(--sf-green); }
+.step-card.completed .step-number { background: var(--sf-green); }
+.step-header { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-lg); background: var(--gray-50); border-bottom: 1px solid var(--gray-200); cursor: pointer; }
+.step-number { width: 40px; height: 40px; background: var(--sf-blue-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.125rem; flex-shrink: 0; }
+.step-info { flex: 1; }
+.step-title { font-size: 1.125rem; font-weight: 600; color: var(--gray-800); margin: 0; }
+.step-duration { font-size: 0.8125rem; color: var(--gray-500); }
+.step-content { padding: var(--space-xl); }
+.step-content.collapsed { display: none; }
+.step-description { color: var(--gray-600); margin-bottom: var(--space-xl); line-height: 1.7; }
+.step-actions { display: flex; justify-content: flex-end; padding-top: var(--space-lg); border-top: 1px solid var(--gray-200); margin-top: var(--space-xl); }
+.btn-check { display: inline-flex; align-items: center; gap: var(--space-sm); background: var(--gray-100); color: var(--gray-700); border: none; padding: var(--space-sm) var(--space-lg); border-radius: var(--radius-md); font-weight: 500; cursor: pointer; transition: all var(--transition-fast); }
+.btn-check:hover { background: var(--sf-green); color: white; }
+.btn-check svg { width: 18px; height: 18px; fill: currentColor; }
+
+.code-block { background: var(--gray-900); border-radius: var(--radius-md); margin: var(--space-lg) 0; overflow: hidden; }
+.code-header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) var(--space-md); background: var(--gray-800); border-bottom: 1px solid var(--gray-700); }
+.code-language { color: var(--gray-400); font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.code-actions { display: flex; gap: var(--space-xs); }
+.code-actions button { background: transparent; border: none; padding: var(--space-xs); cursor: pointer; color: var(--gray-400); border-radius: var(--radius-sm); transition: all var(--transition-fast); }
+.code-actions button:hover { background: var(--gray-700); color: var(--sf-blue-primary); }
+.code-actions button svg { width: 18px; height: 18px; fill: currentColor; }
+.code-block pre { margin: 0; padding: var(--space-lg); overflow-x: auto; }
+.code-block code { font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.6; color: var(--gray-100); white-space: pre; }
+
+.callout { display: flex; gap: var(--space-md); padding: var(--space-lg); border-radius: var(--radius-md); margin: var(--space-lg) 0; }
+.callout-icon { flex-shrink: 0; font-size: 1.25rem; }
+.callout-content { flex: 1; }
+.callout-title { display: block; margin-bottom: var(--space-xs); font-weight: 600; }
+.callout-content p { margin: 0; font-size: 0.9375rem; }
+.callout-info { background: var(--sf-blue-light); border-left: 4px solid var(--sf-blue-primary); }
+.callout-warning { background: #fff9e6; border-left: 4px solid var(--sf-yellow); }
+.callout-success { background: #e6fff2; border-left: 4px solid var(--sf-green); }
+.callout-tip { background: #f0fff0; border-left: 4px solid var(--sf-green); }
+
+.completion-section { display: none; background: linear-gradient(135deg, var(--sf-green), #38a169); color: white; padding: var(--space-3xl) 0; text-align: center; margin-left: var(--sidebar-width); }
+.completion-section.visible { display: block; }
+.completion-container { max-width: 600px; margin: 0 auto; padding: 0 var(--space-xl); }
+.completion-icon { width: 80px; height: 80px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-xl); }
+.completion-icon svg { width: 48px; height: 48px; fill: var(--sf-green); }
+.completion-section h2 { font-size: 2rem; margin-bottom: var(--space-md); }
+
+.hol-footer { background: var(--gray-900); color: var(--gray-400); padding: var(--space-2xl) 0; margin-left: var(--sidebar-width); }
+.footer-container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-xl); display: flex; justify-content: space-between; align-items: center; }
+.footer-brand { display: flex; align-items: center; gap: var(--space-md); }
+.footer-logo { height: 32px; width: auto; filter: brightness(0) invert(1); }
+.footer-links { display: flex; gap: var(--space-xl); }
+.footer-links a { color: var(--gray-400); transition: color var(--transition-fast); }
+.footer-links a:hover { color: white; }
+.footer-meta { text-align: right; font-size: 0.8125rem; }
+
+.disclaimer { background: var(--gray-100); border: 1px dashed var(--gray-300); border-radius: var(--radius-md); padding: var(--space-md); margin: var(--space-lg) 0; font-size: 0.85rem; color: var(--gray-500); }
+
+@media (max-width: 1200px) { .hero-container { grid-template-columns: 1fr; } .hero-visual { display: none; } }
+@media (max-width: 992px) { .progress-tracker { display: none; } .steps-container, .hol-footer, .completion-section { margin-left: 0; } .overview-grid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .header-nav { display: none; } .hero-title { font-size: 1.75rem; } .hero-meta { flex-wrap: wrap; gap: var(--space-md); } }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.step-card { animation: fadeIn 0.3s ease; }
+    </style>
+</head>
+<body data-hol-id="barclays-data-product-cortex">
+
+    <header class="hol-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img src="https://www.logo.wine/a/logo/Snowflake_Inc./Snowflake_Inc.-Logo.wine.svg" alt="Snowflake" class="snowflake-logo">
+                <span class="logo-divider"></span>
+                <span class="hol-badge">Hands-On Lab</span>
+            </div>
+            <nav class="header-nav">
+                <a href="#overview">Overview</a>
+                <a href="#prerequisites">Prerequisites</a>
+                <a href="#steps">Steps</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <span class="industry-tag">Financial Services</span>
+                <h1 class="hero-title">Building a Data Product with Cortex AI</h1>
+                <p class="hero-subtitle">Build an AI-enriched Payments Operations data product on Snowflake. Use Cortex Code to scaffold a dbt transformation layer, Cortex AI functions for enrichment, and Snowflake CoWork for natural language analytics.</p>
+                <div class="hero-meta">
+                    <div class="meta-item">
+                        <svg class="meta-icon" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></svg>
+                        <span>90 minutes</span>
+                    </div>
+                    <div class="meta-item">
+                        <svg class="meta-icon" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 4l7.5 13h-15L12 6z"/></svg>
+                        <span>Intermediate</span>
+                    </div>
+                    <div class="meta-item">
+                        <svg class="meta-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                        <span>6 steps</span>
+                    </div>
+                </div>
+                <a href="#step-1" class="hero-cta">Start Lab</a>
+            </div>
+            <div class="hero-visual">
+                <div class="architecture-preview">
+RAW PAYMENTS DATA
+        |
+        v
+[Cortex Code + dbt]
+  - stg_payments
+  - mart_payment_kpis
+  - mart_sla_compliance
+        |
+        v
+[Cortex AI Enrichment]
+  - SENTIMENT()
+  - CLASSIFY_TEXT()
+  - COMPLETE()
+        |
+        v
+[Dynamic Tables]
+  - Real-time ops layer
+  - Auto-refresh
+        |
+        v
+[Snowflake CoWork]
+  - Semantic View
+  - Cortex Analyst Agent
+        |
+        v
+[Document & Describe]
+  - COMMENT ON
+  - Data Catalog
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="overview" class="content-section">
+        <div class="section-container">
+            <h2 class="section-title">Overview</h2>
+            <div class="overview-grid">
+                <div class="overview-card">
+                    <h3>What You'll Learn</h3>
+                    <ul class="learning-list">
+                        <li>Build a payments operations dataset with synthetic data</li>
+                        <li>Use Cortex Code to scaffold and deploy a dbt project</li>
+                        <li>Enrich data with Cortex AI (sentiment, classification, LLM)</li>
+                        <li>Build a Semantic View for natural language queries via Cortex Analyst</li>
+                        <li>Document objects so they are discoverable in the Data Catalog</li>
+                    </ul>
+                </div>
+                <div class="overview-card">
+                    <h3>Technologies Used</h3>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Cortex Code</span>
+                        <span class="tech-tag">dbt</span>
+                        <span class="tech-tag">Cortex AI Functions</span>
+                        <span class="tech-tag">Dynamic Tables</span>
+                        <span class="tech-tag">Cortex Analyst</span>
+                        <span class="tech-tag">Semantic Views</span>
+                        <span class="tech-tag">Cortex Agents</span>
+                        <span class="tech-tag">Snowsight</span>
+                    </div>
+                </div>
+                <div class="overview-card highlight">
+                    <h3>Use Case</h3>
+                    <p>A payments operations team needs real-time visibility into transaction health, SLA compliance, and customer experience. We'll build an AI-enriched data product that automatically monitors KPIs and enables natural language analysis.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="prerequisites" class="content-section alt-bg">
+        <div class="section-container">
+            <h2 class="section-title">Prerequisites</h2>
+            <div class="overview-grid">
+                <div class="overview-card highlight">
+                    <h3>1. Register for Your Snowflake Account</h3>
+                    <p>A dedicated Snowflake account has been provisioned for this lab. Register using the link below:</p>
+                    <p style="margin-top: 0.75rem;"><a href="https://go.dataops.live/tech-fest-barclays/register" target="_blank" style="background: var(--sf-blue-primary); color: white; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; display: inline-block;">Register for Account &rarr;</a></p>
+                    <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--gray-500);">You will receive login credentials within a few minutes of registering.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>2. Web Browser</h3>
+                    <p>A modern browser (Chrome, Firefox, or Edge) to access Snowsight.</p>
+                </div>
+                <div class="overview-card">
+                    <h3>3. Basic SQL Knowledge</h3>
+                    <p>Familiarity with SQL SELECT, JOIN, and CREATE TABLE statements. No prior dbt or AI experience required &mdash; we'll guide you through everything.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <aside class="progress-tracker" id="progressTracker">
+        <div class="progress-header">
+            <span>Progress</span>
+            <span class="progress-percent">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <nav class="steps-nav" id="stepsNav">
+            <a class="step-nav-item" data-step="1" onclick="scrollToStep(1)"><span>1. Environment Setup</span></a>
+            <a class="step-nav-item" data-step="2" onclick="scrollToStep(2)"><span>2. Load Payments Data</span></a>
+            <a class="step-nav-item" data-step="3" onclick="scrollToStep(3)"><span>3. dbt with Cortex Code</span></a>
+            <a class="step-nav-item" data-step="4" onclick="scrollToStep(4)"><span>4. Cortex AI Enrichment</span></a>
+            <a class="step-nav-item" data-step="5" onclick="scrollToStep(5)"><span>5. Snowflake CoWork</span></a>
+            <a class="step-nav-item" data-step="6" onclick="scrollToStep(6)"><span>6. Document &amp; Describe</span></a>
+        </nav>
+        <button onclick="resetProgress()" style="margin-top:1.5rem;width:100%;padding:0.5rem;border:1px solid var(--gray-300);border-radius:var(--radius-md);background:var(--gray-100);color:var(--gray-600);font-size:0.8rem;cursor:pointer;transition:all var(--transition-fast);">Reset Progress</button>
+    </aside>
+
+    <main class="steps-container" id="steps">
+
+        <!-- STEP 1 -->
+        <article class="step-card" id="step-1" data-step="1">
+            <div class="step-header" onclick="toggleStep(this)">
+                <div class="step-number">1</div>
+                <div class="step-info">
+                    <h2 class="step-title">Environment Setup</h2>
+                    <span class="step-duration">~5 min</span>
+                </div>
+            </div>
+            <div class="step-content">
+                <div class="step-description">
+                    <p>Create the database, schemas, and warehouse for the lab. We organise data into three schemas: <code>RAW_DATA</code> for source tables, <code>ANALYTICS</code> for transformed views, and <code>DATA_PRODUCTS</code> for shareable assets.</p>
+                </div>
+
+                <div class="callout callout-warning">
+                    <div class="callout-icon">&#9888;&#65039;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Trial Account Note</strong>
+                        <p>This lab is fully compatible with Snowflake trial accounts. Where advanced features require the Snowsight UI, instructions are provided.</p>
+                    </div>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- =====================================================
+-- BARCLAYS HANDS-ON LAB
+-- STEP 1: ENVIRONMENT SETUP
+-- =====================================================
+
+-- Create the lab database
+CREATE OR REPLACE DATABASE BARCLAYS_HOL
+    COMMENT = 'Barclays Payments Data Product - Hands-on Lab';
+
+-- Create organised schemas
+CREATE OR REPLACE SCHEMA BARCLAYS_HOL.RAW_DATA
+    COMMENT = 'Raw payments and operations data';
+
+CREATE OR REPLACE SCHEMA BARCLAYS_HOL.ANALYTICS
+    COMMENT = 'AI-enriched views and analytical models';
+
+CREATE OR REPLACE SCHEMA BARCLAYS_HOL.DATA_PRODUCTS
+    COMMENT = 'Packaged data products for sharing';
+
+-- Create warehouse optimised for the lab
+CREATE OR REPLACE WAREHOUSE BARCLAYS_WH
+    WITH
+    WAREHOUSE_SIZE = 'SMALL'
+    AUTO_SUSPEND = 60
+    AUTO_RESUME = TRUE
+    INITIALLY_SUSPENDED = TRUE
+    COMMENT = 'Warehouse for Barclays HOL';
+
+-- Activate context
+USE WAREHOUSE BARCLAYS_WH;
+USE DATABASE BARCLAYS_HOL;
+USE SCHEMA RAW_DATA;
+
+-- Verify Cortex AI is available
+SELECT SNOWFLAKE.CORTEX.SENTIMENT('Payment processed successfully') AS cortex_test;
+
+-- Verify setup
+SELECT 'Setup complete' AS STATUS;</code></pre>
+                </div>
+
+                <div class="callout callout-success">
+                    <div class="callout-icon">&#9989;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Verification</strong>
+                        <p>You should see a sentiment score (positive number close to 1.0) confirming Cortex AI is available.</p>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn-check" onclick="markStepComplete(1)">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                        Mark as complete
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        <!-- STEP 2 -->
+        <article class="step-card" id="step-2" data-step="2">
+            <div class="step-header" onclick="toggleStep(this)">
+                <div class="step-number">2</div>
+                <div class="step-info">
+                    <h2 class="step-title">Load Payments Data</h2>
+                    <span class="step-duration">~10 min</span>
+                </div>
+            </div>
+            <div class="step-content">
+                <div class="step-description">
+                    <p>Generate synthetic payments operations data simulating Barclays corporate payments: transactions, customer feedback, SLA definitions, and operational alerts.</p>
+                </div>
+
+                <div class="disclaimer">This lab uses entirely synthetic data for demonstration purposes. No real customer or transaction data is used.</div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- =====================================================
+-- STEP 2: LOAD PAYMENTS DATA
+-- =====================================================
+
+USE WAREHOUSE BARCLAYS_WH;
+USE DATABASE BARCLAYS_HOL;
+USE SCHEMA RAW_DATA;
+
+-- 2.1: Payments Transactions
+CREATE OR REPLACE TABLE PAYMENTS (
+    PAYMENT_ID VARCHAR(20),
+    PAYMENT_DATE TIMESTAMP,
+    ORIGINATOR_NAME VARCHAR(200),
+    BENEFICIARY_NAME VARCHAR(200),
+    PAYMENT_TYPE VARCHAR(30),
+    CHANNEL VARCHAR(20),
+    CURRENCY VARCHAR(3),
+    AMOUNT NUMBER(15,2),
+    STATUS VARCHAR(20),
+    PROCESSING_TIME_MS NUMBER,
+    ERROR_CODE VARCHAR(10),
+    REGION VARCHAR(30)
+);
+
+INSERT INTO PAYMENTS
+SELECT
+    'PAY' || LPAD(SEQ4()::VARCHAR, 10, '0') AS PAYMENT_ID,
+    DATEADD('minute', -UNIFORM(1, 525600, RANDOM()), CURRENT_TIMESTAMP()) AS PAYMENT_DATE,
+    ARRAY_CONSTRUCT('Acme Corp', 'Global Trading Ltd', 'Smith & Partners', 'Northern Industries', 'Atlantic Shipping Co', 'EuroTech GmbH', 'Pacific Holdings', 'Delta Manufacturing')[UNIFORM(0, 7, RANDOM())]::VARCHAR AS ORIGINATOR_NAME,
+    ARRAY_CONSTRUCT('Royal Trust PLC', 'Metro Services Ltd', 'Crown Logistics', 'Harbour Finance', 'Sterling Solutions', 'Thames Trading', 'Oxford Investments', 'Cambridge Consulting')[UNIFORM(0, 7, RANDOM())]::VARCHAR AS BENEFICIARY_NAME,
+    ARRAY_CONSTRUCT('SWIFT', 'BACS', 'CHAPS', 'Faster Payments', 'SEPA', 'Wire Transfer')[UNIFORM(0, 5, RANDOM())]::VARCHAR AS PAYMENT_TYPE,
+    ARRAY_CONSTRUCT('API', 'Online Banking', 'Branch', 'File Upload', 'Mobile')[UNIFORM(0, 4, RANDOM())]::VARCHAR AS CHANNEL,
+    ARRAY_CONSTRUCT('GBP', 'GBP', 'GBP', 'EUR', 'USD')[UNIFORM(0, 4, RANDOM())]::VARCHAR AS CURRENCY,
+    ROUND(UNIFORM(100, 5000000, RANDOM())::FLOAT, 2) AS AMOUNT,
+    ARRAY_CONSTRUCT('COMPLETED', 'COMPLETED', 'COMPLETED', 'COMPLETED', 'PENDING', 'FAILED', 'RETURNED')[UNIFORM(0, 6, RANDOM())]::VARCHAR AS STATUS,
+    UNIFORM(50, 30000, RANDOM()) AS PROCESSING_TIME_MS,
+    CASE WHEN UNIFORM(1, 20, RANDOM()) = 1 THEN 'ERR' || LPAD(UNIFORM(1, 50, RANDOM())::VARCHAR, 3, '0') ELSE NULL END AS ERROR_CODE,
+    ARRAY_CONSTRUCT('UK', 'UK', 'UK', 'EMEA', 'APAC', 'Americas')[UNIFORM(0, 5, RANDOM())]::VARCHAR AS REGION
+FROM TABLE(GENERATOR(ROWCOUNT => 50000));
+
+--Validate Payments Data
+SELECT * FROM PAYMENTS LIMIT 10;
+
+-- 2.2: Customer Feedback on Payment Services
+CREATE OR REPLACE TABLE CUSTOMER_FEEDBACK (
+    FEEDBACK_ID VARCHAR(15),
+    FEEDBACK_DATE TIMESTAMP,
+    CUSTOMER_NAME VARCHAR(200),
+    FEEDBACK_CHANNEL VARCHAR(30),
+    FEEDBACK_TEXT VARCHAR(1000),
+    PAYMENT_TYPE VARCHAR(30),
+    RATING NUMBER(1)
+);
+
+INSERT INTO CUSTOMER_FEEDBACK
+SELECT
+    'FB' || LPAD(SEQ4()::VARCHAR, 8, '0') AS FEEDBACK_ID,
+    DATEADD('hour', -UNIFORM(1, 8760, RANDOM()), CURRENT_TIMESTAMP()) AS FEEDBACK_DATE,
+    ARRAY_CONSTRUCT('Acme Corp', 'Global Trading Ltd', 'Smith & Partners', 'Northern Industries', 'Atlantic Shipping Co', 'EuroTech GmbH')[UNIFORM(0, 5, RANDOM())]::VARCHAR AS CUSTOMER_NAME,
+    ARRAY_CONSTRUCT('Email', 'Phone', 'Portal', 'Survey', 'Chat')[UNIFORM(0, 4, RANDOM())]::VARCHAR AS FEEDBACK_CHANNEL,
+    ARRAY_CONSTRUCT(
+        'The SWIFT payment was processed very quickly today. Excellent service as always from the team.',
+        'Our BACS payment was delayed by 3 hours which caused issues with our supplier. Very disappointing.',
+        'The new API integration for Faster Payments is brilliant. Reduced our processing time significantly.',
+        'We experienced an outage during peak hours which resulted in 15 failed payments. This is unacceptable for a bank of this calibre.',
+        'The payment tracking dashboard is very helpful. We can now see real-time status of all our international transfers.',
+        'Customer service was unhelpful when we called about a returned CHAPS payment. Took 45 minutes to get resolution.',
+        'Smooth onboarding process for the new payment file format. The documentation was clear and comprehensive.',
+        'Multiple payments stuck in pending status for over 24 hours. Our treasury team is extremely frustrated.',
+        'The fraud detection system flagged a legitimate payment causing a 2-day delay. Need better false positive handling.',
+        'Impressed with the new same-day settlement capability. This has transformed our cash management processes.',
+        'The mobile banking app crashes frequently when approving high-value payments. Needs urgent fix.',
+        'Excellent support from the relationship manager. They proactively informed us about the maintenance window.'
+    )[UNIFORM(0, 11, RANDOM())]::VARCHAR AS FEEDBACK_TEXT,
+    ARRAY_CONSTRUCT('SWIFT', 'BACS', 'CHAPS', 'Faster Payments', 'SEPA')[UNIFORM(0, 4, RANDOM())]::VARCHAR AS PAYMENT_TYPE,
+    UNIFORM(1, 5, RANDOM()) AS RATING
+FROM TABLE(GENERATOR(ROWCOUNT => 2000));
+
+--Validate Customer Feedback Data
+SELECT * FROM CUSTOMER_FEEDBACK LIMIT 10;
+
+-- 2.3: SLA Definitions
+CREATE OR REPLACE TABLE SLA_DEFINITIONS (
+    SLA_ID VARCHAR(10),
+    SLA_NAME VARCHAR(100),
+    PAYMENT_TYPE VARCHAR(30),
+    MAX_PROCESSING_TIME_MS NUMBER,
+    TARGET_SUCCESS_RATE NUMBER(5,2),
+    MEASUREMENT_WINDOW VARCHAR(20)
+);
+
+INSERT INTO SLA_DEFINITIONS VALUES
+('SLA001', 'CHAPS Same-Day Processing', 'CHAPS', 5000, 99.95, 'DAILY'),
+('SLA002', 'Faster Payments Real-Time', 'Faster Payments', 2000, 99.99, 'HOURLY'),
+('SLA003', 'BACS Next-Day Settlement', 'BACS', 86400000, 99.90, 'DAILY'),
+('SLA004', 'SWIFT International Transfer', 'SWIFT', 60000, 99.50, 'DAILY'),
+('SLA005', 'SEPA Euro Transfers', 'SEPA', 30000, 99.80, 'DAILY');
+
+--Validate SLA Definitions
+SELECT * FROM SLA_DEFINITIONS;
+
+-- 2.4: Operational Alerts
+CREATE OR REPLACE TABLE OPERATIONAL_ALERTS (
+    ALERT_ID VARCHAR(15),
+    ALERT_TIME TIMESTAMP,
+    SEVERITY VARCHAR(10),
+    PAYMENT_TYPE VARCHAR(30),
+    ALERT_DESCRIPTION VARCHAR(500),
+    STATUS VARCHAR(20),
+    ASSIGNED_TO VARCHAR(100),
+    RESOLUTION_TIME_MIN NUMBER
+);
+
+INSERT INTO OPERATIONAL_ALERTS
+SELECT
+    'ALT' || LPAD(SEQ4()::VARCHAR, 8, '0') AS ALERT_ID,
+    DATEADD('minute', -UNIFORM(1, 43200, RANDOM()), CURRENT_TIMESTAMP()) AS ALERT_TIME,
+    ARRAY_CONSTRUCT('LOW', 'MEDIUM', 'MEDIUM', 'HIGH', 'CRITICAL')[UNIFORM(0, 4, RANDOM())]::VARCHAR AS SEVERITY,
+    ARRAY_CONSTRUCT('SWIFT', 'BACS', 'CHAPS', 'Faster Payments', 'SEPA')[UNIFORM(0, 4, RANDOM())]::VARCHAR AS PAYMENT_TYPE,
+    ARRAY_CONSTRUCT(
+        'Processing time exceeded SLA threshold',
+        'Elevated failure rate detected',
+        'Connectivity issue with clearing house',
+        'Unusual transaction volume spike',
+        'Settlement file delivery delayed',
+        'Duplicate payment detection triggered',
+        'Beneficiary validation timeout'
+    )[UNIFORM(0, 6, RANDOM())]::VARCHAR AS ALERT_DESCRIPTION,
+    ARRAY_CONSTRUCT('OPEN', 'OPEN', 'ACKNOWLEDGED', 'INVESTIGATING', 'RESOLVED', 'RESOLVED')[UNIFORM(0, 5, RANDOM())]::VARCHAR AS STATUS,
+    'Ops Team ' || ARRAY_CONSTRUCT('Alpha', 'Beta', 'Gamma')[UNIFORM(0, 2, RANDOM())]::VARCHAR AS ASSIGNED_TO,
+    CASE WHEN UNIFORM(1, 3, RANDOM()) != 1 THEN UNIFORM(5, 480, RANDOM()) ELSE NULL END AS RESOLUTION_TIME_MIN
+FROM TABLE(GENERATOR(ROWCOUNT => 1500));
+
+--Validate Operational Alerts
+SELECT * FROM OPERATIONAL_ALERTS LIMIT 10;
+
+
+-- Verify data loaded
+SELECT 'PAYMENTS' AS TABLE_NAME, COUNT(*) AS ROW_COUNT FROM PAYMENTS
+UNION ALL SELECT 'CUSTOMER_FEEDBACK', COUNT(*) FROM CUSTOMER_FEEDBACK
+UNION ALL SELECT 'SLA_DEFINITIONS', COUNT(*) FROM SLA_DEFINITIONS
+UNION ALL SELECT 'OPERATIONAL_ALERTS', COUNT(*) FROM OPERATIONAL_ALERTS;</code></pre>
+                </div>
+
+                <div class="callout callout-success">
+                    <div class="callout-icon">&#9989;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Expected Result</strong>
+                        <p>PAYMENTS: 50,000 rows | CUSTOMER_FEEDBACK: 2,000 rows | SLA_DEFINITIONS: 5 rows | OPERATIONAL_ALERTS: 1,500 rows</p>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn-check" onclick="markStepComplete(2)">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                        Mark as complete
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        <!-- STEP 3: dbt with Cortex Code -->
+        <article class="step-card" id="step-3" data-step="3">
+            <div class="step-header" onclick="toggleStep(this)">
+                <div class="step-number">3</div>
+                <div class="step-info">
+                    <h2 class="step-title">Build a dbt Layer with Cortex Code</h2>
+                    <span class="step-duration">~20 min</span>
+                </div>
+            </div>
+            <div class="step-content">
+                <div class="step-description">
+                    <p>Use <strong>Cortex Code</strong> — Snowflake's built-in AI coding assistant — to scaffold and deploy a dbt transformation layer directly from the Snowsight UI. No terminal required. Cortex Code will generate your staging and mart models, configure the project, and run the deployment.</p>
+                </div>
+
+                <div class="callout callout-info">
+                    <div class="callout-icon">&#128172;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">What is Cortex Code?</strong>
+                        <p>Cortex Code is an AI-powered coding assistant built into Snowflake. It understands your data schema, writes SQL and dbt models, and can deploy them &mdash; all within the Snowflake platform. Think of it as your pair programmer that already knows your data.</p>
+                    </div>
+                </div>
+
+                <div class="callout callout-warning">
+                    <div class="callout-icon">&#9888;&#65039;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Pre-requisite</strong>
+                        <p>Complete Steps 1 and 2 first. Cortex Code will reference the <code>RAW_DATA.PAYMENTS</code> and <code>RAW_DATA.SLA_DEFINITIONS</code> tables you just created.</p>
+                    </div>
+                </div>
+
+                <h3 style="margin: 1.5rem 0 0.75rem;">3.1 &mdash; Open Cortex Code in Snowsight</h3>
+                <ol style="padding-left: 1.5rem; color: var(--gray-700); line-height: 2.2;">
+                    <li>In Snowsight, click the <strong>Cortex Code</strong> icon in the left sidebar (looks like a chat bubble with a sparkle)</li>
+                    <li>A code editor + chat panel will open side by side</li>
+                    <li>Make sure your context is set to <code>BARCLAYS_HOL</code> / <code>RAW_DATA</code></li>
+                </ol>
+
+                <h3 style="margin: 1.5rem 0 0.75rem;">3.2 &mdash; Prompt Cortex Code to scaffold the dbt project</h3>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;">Copy and paste this prompt into the Cortex Code chat:</p>
+
+                <div class="code-block" data-language="text">
+                    <div class="code-header">
+                        <span class="code-language">Cortex Code Prompt</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy prompt"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>Create a dbt project called barclays_payments that builds 3 models in BARCLAYS_HOL.ANALYTICS schema. Use BARCLAYS_WH warehouse. Here is the EXACT specification:
+
+MODEL 1: stg_payments (materialized as table)
+Source: BARCLAYS_HOL.RAW_DATA.PAYMENTS
+Output columns (use these EXACT names):
+  - PAYMENT_ID (VARCHAR, from PAYMENT_ID)
+  - PAYMENT_DATE (TIMESTAMP, from PAYMENT_DATE)
+  - PAYMENT_TYPE (VARCHAR, UPPER(PAYMENT_TYPE))
+  - CHANNEL (VARCHAR, UPPER(CHANNEL))
+  - CURRENCY (VARCHAR)
+  - AMOUNT (NUMBER(15,2), cast from AMOUNT)
+  - STATUS (VARCHAR, UPPER(STATUS))
+  - PROCESSING_TIME_MS (NUMBER, from PROCESSING_TIME_MS)
+  - REGION (VARCHAR, UPPER(REGION))
+  - IS_SUCCESSFUL (BOOLEAN, = TRUE when STATUS = 'COMPLETED')
+  - IS_FAILED (BOOLEAN, = TRUE when STATUS = 'FAILED')
+
+MODEL 2: mart_payment_kpis (materialized as table)
+Source: ref('stg_payments')
+Group by: DATE_TRUNC('DAY', PAYMENT_DATE) AS PAYMENT_DATE, PAYMENT_TYPE, REGION
+Output columns (use these EXACT names):
+  - PAYMENT_DATE
+  - PAYMENT_TYPE
+  - REGION
+  - TOTAL_PAYMENTS (COUNT(*))
+  - TOTAL_VOLUME (SUM(AMOUNT))
+  - SUCCESS_RATE_PCT (ROUND(COUNT_IF(IS_SUCCESSFUL)::FLOAT / COUNT(*) * 100, 2))
+  - AVG_PROCESSING_TIME_MS (ROUND(AVG(PROCESSING_TIME_MS), 0))
+  - P95_PROCESSING_TIME_MS (ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY PROCESSING_TIME_MS), 0))
+
+MODEL 3: mart_sla_compliance (materialized as table)
+Source: ref('mart_payment_kpis') JOIN BARCLAYS_HOL.RAW_DATA.SLA_DEFINITIONS ON PAYMENT_TYPE = PAYMENT_TYPE
+Output columns (use these EXACT names):
+  - PAYMENT_DATE (from mart_payment_kpis)
+  - PAYMENT_TYPE (from mart_payment_kpis)
+  - REGION (from mart_payment_kpis)
+  - SUCCESS_RATE_PCT (from mart_payment_kpis)
+  - P95_PROCESSING_TIME_MS (from mart_payment_kpis)
+  - SLA_TARGET_SUCCESS_RATE (from SLA_DEFINITIONS.TARGET_SUCCESS_RATE)
+  - MAX_PROCESSING_TIME_MS (from SLA_DEFINITIONS.MAX_PROCESSING_TIME_MS)
+  - SLA_STATUS (CASE:
+      'COMPLIANT' when SUCCESS_RATE_PCT >= SLA_TARGET_SUCCESS_RATE AND P95_PROCESSING_TIME_MS <= MAX_PROCESSING_TIME_MS,
+      'AT RISK' when SUCCESS_RATE_PCT >= SLA_TARGET_SUCCESS_RATE * 0.95,
+      else 'BREACH')
+
+Configuration:
+- dbt_project.yml with project name barclays_payments
+- profiles.yml targeting snowflake, database BARCLAYS_HOL, warehouse BARCLAYS_WH
+- schema.yml with not_null tests on key columns and accepted_values test on SLA_STATUS ('COMPLIANT', 'AT RISK', 'BREACH')
+
+After generating all files, run dbt run and dbt test.</code></pre>
+                </div>
+
+                <div class="callout callout-tip">
+                    <div class="callout-icon">&#128161;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">What Cortex Code does next</strong>
+                        <p>Cortex Code will generate all model files, configure the project for your Snowflake account, run <code>dbt run</code> to deploy the tables, then run <code>dbt test</code> to validate data quality. Watch the output panel on the right.</p>
+                    </div>
+                </div>
+
+                <h3 style="margin: 1.5rem 0 0.75rem;">3.3 &mdash; Validate the dbt output matches the specification</h3>
+                <p style="color: var(--gray-600); margin-bottom: 0.5rem;">Once Cortex Code finishes, run this validation script in a Snowsight worksheet. Every check should return <strong>PASS</strong>:</p>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- =====================================================
+-- STEP 3 VALIDATION: Verify dbt output matches spec
+-- =====================================================
+
+USE DATABASE BARCLAYS_HOL;
+
+-- 1. Check all 3 tables exist in ANALYTICS
+WITH expected_tables AS (
+    SELECT column1 AS TABLE_NAME FROM VALUES
+        ('STG_PAYMENTS'),
+        ('MART_PAYMENT_KPIS'),
+        ('MART_SLA_COMPLIANCE')
+),
+actual_tables AS (
+    SELECT TABLE_NAME
+    FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_SCHEMA = 'ANALYTICS' AND TABLE_TYPE = 'BASE TABLE'
+)
+SELECT
+    e.TABLE_NAME,
+    IFF(a.TABLE_NAME IS NOT NULL, 'PASS', 'FAIL - TABLE MISSING') AS STATUS
+FROM expected_tables e
+LEFT JOIN actual_tables a ON e.TABLE_NAME = a.TABLE_NAME;
+
+-- 2. Check all expected columns exist per table
+WITH expected_columns AS (
+    SELECT column1 AS TABLE_NAME, column2 AS COLUMN_NAME FROM VALUES
+        -- stg_payments
+        ('STG_PAYMENTS', 'PAYMENT_ID'),
+        ('STG_PAYMENTS', 'PAYMENT_DATE'),
+        ('STG_PAYMENTS', 'PAYMENT_TYPE'),
+        ('STG_PAYMENTS', 'CHANNEL'),
+        ('STG_PAYMENTS', 'CURRENCY'),
+        ('STG_PAYMENTS', 'AMOUNT'),
+        ('STG_PAYMENTS', 'STATUS'),
+        ('STG_PAYMENTS', 'PROCESSING_TIME_MS'),
+        ('STG_PAYMENTS', 'REGION'),
+        ('STG_PAYMENTS', 'IS_SUCCESSFUL'),
+        ('STG_PAYMENTS', 'IS_FAILED'),
+        -- mart_payment_kpis
+        ('MART_PAYMENT_KPIS', 'PAYMENT_DATE'),
+        ('MART_PAYMENT_KPIS', 'PAYMENT_TYPE'),
+        ('MART_PAYMENT_KPIS', 'REGION'),
+        ('MART_PAYMENT_KPIS', 'TOTAL_PAYMENTS'),
+        ('MART_PAYMENT_KPIS', 'TOTAL_VOLUME'),
+        ('MART_PAYMENT_KPIS', 'SUCCESS_RATE_PCT'),
+        ('MART_PAYMENT_KPIS', 'AVG_PROCESSING_TIME_MS'),
+        ('MART_PAYMENT_KPIS', 'P95_PROCESSING_TIME_MS'),
+        -- mart_sla_compliance
+        ('MART_SLA_COMPLIANCE', 'PAYMENT_DATE'),
+        ('MART_SLA_COMPLIANCE', 'PAYMENT_TYPE'),
+        ('MART_SLA_COMPLIANCE', 'REGION'),
+        ('MART_SLA_COMPLIANCE', 'SLA_TARGET_SUCCESS_RATE'),
+        ('MART_SLA_COMPLIANCE', 'SUCCESS_RATE_PCT'),
+        ('MART_SLA_COMPLIANCE', 'P95_PROCESSING_TIME_MS'),
+        ('MART_SLA_COMPLIANCE', 'MAX_PROCESSING_TIME_MS'),
+        ('MART_SLA_COMPLIANCE', 'SLA_STATUS')
+),
+actual_columns AS (
+    SELECT TABLE_NAME, COLUMN_NAME
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'ANALYTICS'
+)
+SELECT
+    e.TABLE_NAME,
+    e.COLUMN_NAME,
+    IFF(a.COLUMN_NAME IS NOT NULL, 'PASS', 'FAIL - COLUMN MISSING') AS STATUS
+FROM expected_columns e
+LEFT JOIN actual_columns a ON e.TABLE_NAME = a.TABLE_NAME AND e.COLUMN_NAME = a.COLUMN_NAME
+ORDER BY e.TABLE_NAME, e.COLUMN_NAME;
+
+-- 3. Check data integrity (rows exist and values are sensible)
+SELECT
+    'STG_PAYMENTS' AS TABLE_NAME,
+    COUNT(*) AS ROW_COUNT,
+    IFF(COUNT(*) >= 50000, 'PASS', 'FAIL - ROW COUNT LOW') AS STATUS
+FROM ANALYTICS.STG_PAYMENTS
+UNION ALL
+SELECT
+    'MART_PAYMENT_KPIS',
+    COUNT(*),
+    IFF(COUNT(*) > 100, 'PASS', 'FAIL - ROW COUNT LOW')
+FROM ANALYTICS.MART_PAYMENT_KPIS
+UNION ALL
+SELECT
+    'MART_SLA_COMPLIANCE',
+    COUNT(*),
+    IFF(COUNT(*) > 10, 'PASS', 'FAIL - ROW COUNT LOW')
+FROM ANALYTICS.MART_SLA_COMPLIANCE;
+
+-- 4. Check SLA_STATUS contains only expected values
+SELECT
+    SLA_STATUS,
+    COUNT(*) AS COUNT,
+    IFF(SLA_STATUS IN ('COMPLIANT', 'AT RISK', 'BREACH'), 'PASS', 'FAIL - UNEXPECTED VALUE') AS STATUS
+FROM ANALYTICS.MART_SLA_COMPLIANCE
+GROUP BY SLA_STATUS;
+
+-- 5. Final verdict
+SELECT
+    IFF(
+        (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ANALYTICS' AND TABLE_NAME IN ('STG_PAYMENTS','MART_PAYMENT_KPIS','MART_SLA_COMPLIANCE')) = 3
+        AND (SELECT COUNT(*) FROM ANALYTICS.MART_SLA_COMPLIANCE WHERE SLA_STATUS IN ('COMPLIANT','AT RISK','BREACH')) > 0
+        AND (SELECT COUNT(*) FROM ANALYTICS.MART_PAYMENT_KPIS WHERE SUCCESS_RATE_PCT BETWEEN 0 AND 100) > 0,
+        '✅ ALL CHECKS PASSED - proceed to Step 4',
+        '❌ VALIDATION FAILED - ask Cortex Code to fix the issues shown above'
+    ) AS FINAL_VERDICT;</code></pre>
+                </div>
+
+                <h3 style="margin: 1.5rem 0 0.75rem;">3.4 &mdash; Ask Cortex Code to explain what it built</h3>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;">Back in Cortex Code chat, try this follow-up:</p>
+
+                <div class="code-block" data-language="text">
+                    <div class="code-header">
+                        <span class="code-language">Cortex Code Prompt</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy prompt"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>Explain the lineage of the mart_sla_compliance model. Which source tables does it depend on, and what transformations happen at each layer?</code></pre>
+                </div>
+
+                <div class="callout callout-success">
+                    <div class="callout-icon">&#9989;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Step complete when:</strong>
+                        <p>The validation script returns <code>✅ ALL CHECKS PASSED</code>. If any check shows FAIL, copy the failing output back into Cortex Code and ask it to fix the issue.</p>
+                    </div>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- =====================================================
+-- STEP 3: CORTEX AI ENRICHMENT
+-- =====================================================
+
+USE SCHEMA ANALYTICS;
+
+-- 3.1: Sentiment Analysis on Customer Feedback
+CREATE OR REPLACE TABLE BARCLAYS_HOL.ANALYTICS.FEEDBACK_ENRICHED AS
+SELECT
+    f.FEEDBACK_ID,
+    f.FEEDBACK_DATE,
+    f.CUSTOMER_NAME,
+    f.FEEDBACK_CHANNEL,
+    f.FEEDBACK_TEXT,
+    f.PAYMENT_TYPE,
+    f.RATING,
+
+    -- Sentiment score (-1 to +1)
+    ROUND(SNOWFLAKE.CORTEX.SENTIMENT(f.FEEDBACK_TEXT), 3) AS SENTIMENT_SCORE,
+
+    -- Classify sentiment
+    CASE
+        WHEN SNOWFLAKE.CORTEX.SENTIMENT(f.FEEDBACK_TEXT) > 0.3 THEN 'POSITIVE'
+        WHEN SNOWFLAKE.CORTEX.SENTIMENT(f.FEEDBACK_TEXT) < -0.3 THEN 'NEGATIVE'
+        ELSE 'NEUTRAL'
+    END AS SENTIMENT_LABEL,
+
+    -- Auto-classify the feedback topic
+    SNOWFLAKE.CORTEX.CLASSIFY_TEXT(
+        f.FEEDBACK_TEXT,
+        ['Performance Issue', 'Service Quality', 'Technical Problem', 'Positive Experience', 'Feature Request']
+    ):label::STRING AS TOPIC_CATEGORY,
+
+    -- Confidence score
+    SNOWFLAKE.CORTEX.CLASSIFY_TEXT(
+        f.FEEDBACK_TEXT,
+        ['Performance Issue', 'Service Quality', 'Technical Problem', 'Positive Experience', 'Feature Request']
+    ):score::FLOAT AS CLASSIFICATION_CONFIDENCE
+
+FROM RAW_DATA.CUSTOMER_FEEDBACK f;
+
+-- Preview enriched results
+SELECT
+    FEEDBACK_TEXT,
+    SENTIMENT_SCORE,
+    SENTIMENT_LABEL,
+    TOPIC_CATEGORY,
+    ROUND(CLASSIFICATION_CONFIDENCE, 2) AS CONFIDENCE
+FROM FEEDBACK_ENRICHED
+LIMIT 10;</code></pre>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- 3.2: AI-Generated Alert Summaries
+SELECT
+    a.ALERT_ID,
+    a.SEVERITY,
+    a.ALERT_DESCRIPTION,
+    a.PAYMENT_TYPE,
+
+    -- Generate executive summary with recommended action
+    SNOWFLAKE.CORTEX.COMPLETE(
+        'mistral-large2',
+        'You are a payments operations analyst at a major UK bank. ' ||
+        'Given this alert: "' || a.ALERT_DESCRIPTION || '" ' ||
+        'for payment type: ' || a.PAYMENT_TYPE || ' ' ||
+        'with severity: ' || a.SEVERITY || '. ' ||
+        'Provide a one-sentence recommended action.'
+    ) AS AI_RECOMMENDED_ACTION
+
+FROM RAW_DATA.OPERATIONAL_ALERTS a
+WHERE a.STATUS = 'OPEN' AND a.SEVERITY IN ('HIGH', 'CRITICAL')
+LIMIT 5;</code></pre>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- 3.3: Sentiment Distribution Summary
+SELECT
+    SENTIMENT_LABEL,
+    COUNT(*) AS FEEDBACK_COUNT,
+    ROUND(AVG(SENTIMENT_SCORE), 3) AS AVG_SCORE,
+    ROUND(COUNT(*)::FLOAT / (SELECT COUNT(*) FROM FEEDBACK_ENRICHED) * 100, 1) AS PERCENTAGE
+FROM FEEDBACK_ENRICHED
+GROUP BY SENTIMENT_LABEL
+ORDER BY FEEDBACK_COUNT DESC;
+
+-- 3.4: Sentiment by Payment Type
+SELECT
+    PAYMENT_TYPE,
+    COUNT(*) AS TOTAL_FEEDBACK,
+    ROUND(AVG(SENTIMENT_SCORE), 3) AS AVG_SENTIMENT,
+    COUNT(CASE WHEN SENTIMENT_LABEL = 'NEGATIVE' THEN 1 END) AS NEGATIVE_COUNT,
+    ROUND(COUNT(CASE WHEN SENTIMENT_LABEL = 'NEGATIVE' THEN 1 END)::FLOAT / COUNT(*) * 100, 1) AS NEGATIVE_PCT
+FROM FEEDBACK_ENRICHED
+GROUP BY PAYMENT_TYPE
+ORDER BY AVG_SENTIMENT ASC;</code></pre>
+                </div>
+
+                <div class="callout callout-info">
+                    <div class="callout-icon">&#8505;&#65039;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Governance Built-In</strong>
+                        <p>All Cortex AI processing happens within your Snowflake account. Data never leaves the platform, meeting Barclays' data residency and governance requirements.</p>
+                    </div>
+                </div>
+
+                <h3 style="margin: 1.5rem 0 0.75rem;">4.4 &mdash; Dynamic Tables: Real-Time Operational Layer</h3>
+                <p style="color: var(--gray-600); margin-bottom: 0.75rem;">Now add a continuously-refreshing operational layer on top of the AI-enriched data. Dynamic Tables refresh automatically when source data changes &mdash; no orchestration, no scheduling, no stored procedures.</p>
+
+                <div class="callout callout-tip">
+                    <div class="callout-icon">&#128161;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">dbt vs Dynamic Tables</strong>
+                        <p>dbt builds your <strong>batch</strong> transformation layer (scheduled, versioned, tested). Dynamic Tables add a <strong>continuous</strong> operational layer that refreshes itself. They complement each other &mdash; use dbt for the governed data model and DTs for live operational views.</p>
+                    </div>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- =====================================================
+-- 4.4: DYNAMIC TABLES - Real-Time Operational Layer
+-- These refresh automatically when FEEDBACK_ENRICHED changes
+-- =====================================================
+
+USE SCHEMA BARCLAYS_HOL.ANALYTICS;
+
+-- DT 1: Live Negative Sentiment Alert Feed
+-- Surfaces negative feedback within the last 24 hours, refreshing every minute
+CREATE OR REPLACE DYNAMIC TABLE DT_NEGATIVE_SENTIMENT_FEED
+    TARGET_LAG = '1 minute'
+    WAREHOUSE = BARCLAYS_WH
+AS
+SELECT
+    FEEDBACK_ID,
+    FEEDBACK_DATE,
+    CUSTOMER_NAME,
+    PAYMENT_TYPE,
+    FEEDBACK_CHANNEL,
+    FEEDBACK_TEXT,
+    SENTIMENT_SCORE,
+    TOPIC_CATEGORY,
+    CLASSIFICATION_CONFIDENCE
+FROM FEEDBACK_ENRICHED
+WHERE SENTIMENT_LABEL = 'NEGATIVE'
+  AND FEEDBACK_DATE >= DATEADD('hour', -24, CURRENT_TIMESTAMP())
+ORDER BY FEEDBACK_DATE DESC;
+
+-- Preview the live feed
+SELECT * FROM DT_NEGATIVE_SENTIMENT_FEED LIMIT 10;</code></pre>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- DT 2: Operational Sentiment Summary (cascading - refreshes downstream of DT 1)
+-- Aggregates sentiment metrics by payment type for operational dashboards
+CREATE OR REPLACE DYNAMIC TABLE DT_SENTIMENT_OPS_SUMMARY
+    TARGET_LAG = DOWNSTREAM
+    WAREHOUSE = BARCLAYS_WH
+AS
+SELECT
+    PAYMENT_TYPE,
+    COUNT(*) AS TOTAL_FEEDBACK,
+    COUNT(CASE WHEN SENTIMENT_LABEL = 'NEGATIVE' THEN 1 END) AS NEGATIVE_COUNT,
+    COUNT(CASE WHEN SENTIMENT_LABEL = 'POSITIVE' THEN 1 END) AS POSITIVE_COUNT,
+    ROUND(AVG(SENTIMENT_SCORE), 3) AS AVG_SENTIMENT,
+    ROUND(COUNT(CASE WHEN SENTIMENT_LABEL = 'NEGATIVE' THEN 1 END)::FLOAT / COUNT(*) * 100, 1) AS NEGATIVE_PCT,
+    MAX(FEEDBACK_DATE) AS LATEST_FEEDBACK
+FROM FEEDBACK_ENRICHED
+GROUP BY PAYMENT_TYPE;
+
+-- View the operational summary
+SELECT * FROM DT_SENTIMENT_OPS_SUMMARY ORDER BY NEGATIVE_PCT DESC;</code></pre>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- DT 3: Live SLA Breach Counter
+-- Counts active SLA breaches from the dbt mart, refreshing every minute
+CREATE OR REPLACE DYNAMIC TABLE DT_LIVE_BREACH_COUNT
+    TARGET_LAG = '1 minute'
+    WAREHOUSE = BARCLAYS_WH
+AS
+SELECT
+    PAYMENT_TYPE,
+    COUNT(*) AS BREACH_DAYS,
+    MIN(PAYMENT_DATE) AS FIRST_BREACH,
+    MAX(PAYMENT_DATE) AS LATEST_BREACH
+FROM MART_SLA_COMPLIANCE
+WHERE SLA_STATUS = 'BREACH'
+  AND PAYMENT_DATE >= DATEADD('day', -7, CURRENT_DATE())
+GROUP BY PAYMENT_TYPE;
+
+-- View active breaches
+SELECT * FROM DT_LIVE_BREACH_COUNT ORDER BY BREACH_DAYS DESC;
+
+-- Monitor Dynamic Table health
+SHOW DYNAMIC TABLES IN SCHEMA ANALYTICS;
+
+-- Check refresh history
+SELECT
+    NAME,
+    STATE,
+    REFRESH_START_TIME,
+    REFRESH_END_TIME,
+    TIMEDIFF('second', REFRESH_START_TIME, REFRESH_END_TIME) AS DURATION_SECONDS
+FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_REFRESH_HISTORY(
+    NAME => 'ANALYTICS.DT_NEGATIVE_SENTIMENT_FEED'
+))
+ORDER BY REFRESH_START_TIME DESC
+LIMIT 5;</code></pre>
+                </div>
+
+                <div class="callout callout-success">
+                    <div class="callout-icon">&#9989;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">What you've built</strong>
+                        <p><strong>Batch layer (dbt):</strong> Governed, tested KPI marts refreshed on schedule.<br>
+                        <strong>AI layer (Cortex):</strong> Sentiment and classification enrichment.<br>
+                        <strong>Real-time layer (Dynamic Tables):</strong> Continuously-refreshing operational views — no orchestration needed.</p>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn-check" onclick="markStepComplete(3)">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                        Mark as complete
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        <!-- STEP 4: Cortex AI -->
+        <article class="step-card" id="step-4" data-step="4">
+            <div class="step-header" onclick="toggleStep(this)">
+                <div class="step-number">4</div>
+                <div class="step-info">
+                    <h2 class="step-title">Cortex AI Enrichment</h2>
+                    <span class="step-duration">~15 min</span>
+                </div>
+            </div>
+            <div class="step-content">
+                <div class="step-description">
+                    <p>Now that dbt has built clean mart tables, use Snowflake Cortex AI functions to enrich the payments data with sentiment analysis, automated classification, and AI-generated insights &mdash; all in SQL, no external APIs.</p>
+                </div>
+
+                <div class="callout callout-tip">
+                    <div class="callout-icon">&#128161;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Zero Infrastructure AI</strong>
+                        <p>Cortex AI functions run natively inside Snowflake. No API keys, no model hosting, no data movement. Your data never leaves the Snowflake trust boundary.</p>
+                    </div>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- =====================================================
+-- STEP 4: CORTEX AI ENRICHMENT
+-- Companion file: sql/04_cortex_ai.sql
+-- =====================================================
+
+USE SCHEMA BARCLAYS_HOL.ANALYTICS;
+
+-- 4.1: Sentiment Analysis on Customer Feedback
+CREATE OR REPLACE TABLE FEEDBACK_ENRICHED AS
+SELECT
+    f.FEEDBACK_ID,
+    f.FEEDBACK_DATE,
+    f.CUSTOMER_NAME,
+    f.FEEDBACK_CHANNEL,
+    f.FEEDBACK_TEXT,
+    f.PAYMENT_TYPE,
+    f.RATING,
+
+    -- Sentiment score (-1 to +1)
+    ROUND(SNOWFLAKE.CORTEX.SENTIMENT(f.FEEDBACK_TEXT), 3) AS SENTIMENT_SCORE,
+
+    CASE
+        WHEN SNOWFLAKE.CORTEX.SENTIMENT(f.FEEDBACK_TEXT) > 0.3  THEN 'POSITIVE'
+        WHEN SNOWFLAKE.CORTEX.SENTIMENT(f.FEEDBACK_TEXT) < -0.3 THEN 'NEGATIVE'
+        ELSE 'NEUTRAL'
+    END AS SENTIMENT_LABEL,
+
+    -- Auto-classify the feedback topic
+    SNOWFLAKE.CORTEX.CLASSIFY_TEXT(
+        f.FEEDBACK_TEXT,
+        ['Performance Issue', 'Service Quality', 'Technical Problem', 'Positive Experience', 'Feature Request']
+    ):label::STRING AS TOPIC_CATEGORY,
+
+    SNOWFLAKE.CORTEX.CLASSIFY_TEXT(
+        f.FEEDBACK_TEXT,
+        ['Performance Issue', 'Service Quality', 'Technical Problem', 'Positive Experience', 'Feature Request']
+    ):score::FLOAT AS CLASSIFICATION_CONFIDENCE
+
+FROM BARCLAYS_HOL.RAW_DATA.CUSTOMER_FEEDBACK f;
+
+-- Preview
+SELECT FEEDBACK_TEXT, SENTIMENT_SCORE, SENTIMENT_LABEL, TOPIC_CATEGORY
+FROM FEEDBACK_ENRICHED LIMIT 10;</code></pre>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- 4.2: AI-generated recommended actions for open high-severity alerts
+SELECT
+    a.ALERT_ID,
+    a.SEVERITY,
+    a.ALERT_DESCRIPTION,
+    a.PAYMENT_TYPE,
+    SNOWFLAKE.CORTEX.COMPLETE(
+        'mistral-large2',
+        'You are a payments operations analyst at a major UK bank. ' ||
+        'Given this alert: "' || a.ALERT_DESCRIPTION || '" ' ||
+        'for payment type: ' || a.PAYMENT_TYPE || ' ' ||
+        'with severity: ' || a.SEVERITY || '. ' ||
+        'Provide a one-sentence recommended action.'
+    ) AS AI_RECOMMENDED_ACTION
+FROM BARCLAYS_HOL.RAW_DATA.OPERATIONAL_ALERTS a
+WHERE a.STATUS = 'OPEN'
+  AND a.SEVERITY IN ('HIGH', 'CRITICAL')
+LIMIT 5;</code></pre>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- 4.3: Sentiment by payment type
+SELECT
+    PAYMENT_TYPE,
+    COUNT(*) AS TOTAL_FEEDBACK,
+    ROUND(AVG(SENTIMENT_SCORE), 3) AS AVG_SENTIMENT,
+    COUNT(CASE WHEN SENTIMENT_LABEL = 'NEGATIVE' THEN 1 END) AS NEGATIVE_COUNT,
+    ROUND(COUNT(CASE WHEN SENTIMENT_LABEL = 'NEGATIVE' THEN 1 END)::FLOAT / COUNT(*) * 100, 1) AS NEGATIVE_PCT
+FROM FEEDBACK_ENRICHED
+GROUP BY PAYMENT_TYPE
+ORDER BY AVG_SENTIMENT ASC;</code></pre>
+                </div>
+
+                <div class="callout callout-info">
+                    <div class="callout-icon">&#8505;&#65039;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Governance Built-In</strong>
+                        <p>All Cortex AI processing happens within your Snowflake account. Data never leaves the platform, meeting Barclays' data residency and governance requirements.</p>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn-check" onclick="markStepComplete(4)">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                        Mark as complete
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        <!-- STEP 5 -->
+        <article class="step-card" id="step-5" data-step="5">
+            <div class="step-header" onclick="toggleStep(this)">
+                <div class="step-number">5</div>
+                <div class="step-info">
+                    <h2 class="step-title">Snowflake CoWork (Cortex Analyst)</h2>
+                    <span class="step-duration">~15 min</span>
+                </div>
+            </div>
+            <div class="step-content">
+                <div class="step-description">
+                    <p>Create a Semantic View over your dbt mart tables and connect it to a Cortex Agent. This enables business users to ask questions about payment performance in plain English and get instant SQL-backed answers.</p>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- =====================================================
+-- STEP 5: SNOWFLAKE CoWork
+-- =====================================================
+
+-- 5.1: Create an analytics view optimised for the Semantic Model
+CREATE OR REPLACE VIEW ANALYTICS.V_PAYMENTS_ANALYSIS AS
+SELECT
+    -- Time dimensions
+    k.PAYMENT_DATE,
+    DATE_TRUNC('WEEK', k.PAYMENT_DATE) AS PAYMENT_WEEK,
+    DATE_TRUNC('MONTH', k.PAYMENT_DATE) AS PAYMENT_MONTH,
+    YEAR(k.PAYMENT_DATE) AS YEAR,
+    QUARTER(k.PAYMENT_DATE) AS QUARTER,
+
+    -- Business dimensions
+    k.PAYMENT_TYPE,
+    k.REGION,
+
+    -- Volume metrics
+    k.TOTAL_PAYMENTS,
+    k.TOTAL_VOLUME,
+
+    -- Performance metrics
+    k.SUCCESS_RATE_PCT,
+    k.AVG_PROCESSING_TIME_MS,
+    k.P95_PROCESSING_TIME_MS
+
+FROM MART_PAYMENT_KPIS k;
+
+-- Verify
+SELECT * FROM ANALYTICS.V_PAYMENTS_ANALYSIS LIMIT 5;</code></pre>
+                </div>
+
+                <div class="callout callout-info">
+                    <div class="callout-icon">&#129504;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Create the Semantic View via Snowsight UI</strong>
+                        <p>Follow these steps to create your Semantic View using Snowsight Autopilot:</p>
+                    </div>
+                </div>
+
+                <ol style="margin: 1rem 0; padding-left: 1.5rem; color: var(--gray-700);">
+                    <li style="margin-bottom: 0.75rem;"><strong>Navigate to the view:</strong> In Snowsight, go to <code>AI & ML &rarr; Analyst. </br>
+                    Navigate to Semantic Views -> Create with Autopilot and skip the step for setting additional context.
+                    </br> This step allows you to bring in your sql from various sources.</br>
+                   </code></li>
+                
+                    <li style="margin-bottom: 0.75rem;"><strong>Configure:</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            <li>Name: <code>SV_PAYMENTS_BARCLAYS</code></li>
+                            <li>Schema: <code>BARCLAYS_HOL.ANALYTICS</code></li>
+                            <li><code>Select the view V_PAYMENTS_ANALYSIS</code></li>
+                            <li><code>Select all in the select columns page</code></li>
+                             <li><code>Click on create</code></li>
+                            
+                        </ul>
+                    </li>
+                    <li><code>Review auto-detected Dimensions, Time Dimensions and Facts</code></li>
+                    <li style="margin-bottom: 0.75rem;"><strong>Create:</strong> Click <code>Create</code> and wait ~30 seconds</li>
+                </ol>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- 5.2: Verify Semantic View creation
+SHOW SEMANTIC VIEWS IN SCHEMA BARCLAYS_HOL.ANALYTICS;</code></pre>
+                </div>
+
+                <div class="callout callout-info">
+                    <div class="callout-icon">&#129302;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Create the Cortex Agent</strong>
+                        <p>Now create an AI agent that can answer questions about your payments data:</p>
+                    </div>
+                </div>
+
+                <ol style="margin: 1rem 0; padding-left: 1.5rem; color: var(--gray-700);">
+                    <li style="margin-bottom: 0.75rem;"><strong>Navigate:</strong> In Snowsight, go to <code>AI & ML &rarr; Agents</code> (or <code>Snowflake CoWork</code> in the left menu)</li>
+                    <li style="margin-bottom: 0.75rem;"><strong>Create Agent:</strong> Click <code>+ Create</code>
+                        <ul style="margin-top: 0.5rem;">
+                            <li>Name: <code>BARCLAYS_PAYMENTS_ASSISTANT</code></li>
+                            <li>Database: <code>BARCLAYS_HOL</code></li>
+                            <li>Schema: <code>DATA_PRODUCTS</code></li>
+                        </ul>
+                    </li>
+                    <li style="margin-bottom: 0.75rem;"><strong>Add Tool:</strong> Navigate to Tools <code>+ Query Structured Data </code> &rarr; <code>Add Semantic View - > Add tool: Cortex Analyst</code> &rarr; Select Schema BARCLAYS_HOL.ANALYTICS <code>SV_PAYMENTS_BARCLAYS</code></li>
+                    <li style="margin-bottom: 0.75rem;"><strong>Description:</strong><br>
+                        <code>You are a payments operations analyst for Barclays. Answer questions concisely using British English. Format large numbers with commas. When showing monetary values, prefix with the currency symbol.</code>
+                    </li>
+                    <li style="margin-bottom: 0.75rem;"><strong>Navigate to BARCLAYS_PAYMENTS_ASSISTANT -> Overview </strong> Snowflake CoWork <code>+ Add Agent</code>
+                    <li style="margin-bottom: 0.75rem;"><strong>Save:</strong> Click <code>Create</code></li>
+                </ol>
+
+                <div class="callout callout-tip">
+                    <div class="callout-icon">&#128172;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Test Your Agent</strong>
+                        <p>Try these questions:</p>
+                        <ul style="margin-top: 0.5rem; padding-left: 1rem;">
+                            <li>"What is the total payment volume this month?"</li>
+                            <li>"Which payment type has the lowest success rate?"</li>
+                            <li>"Show me the trend of CHAPS payments by week"</li>
+                            <li>"What is the average processing time for Faster Payments?"</li>
+                            <li>"Compare success rates across regions"</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn-check" onclick="markStepComplete(5)">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                        Mark as complete
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        <!-- STEP 6 -->
+        <article class="step-card" id="step-6" data-step="6">
+            <div class="step-header" onclick="toggleStep(this)">
+                <div class="step-number">6</div>
+                <div class="step-info">
+                    <h2 class="step-title">Document &amp; Describe</h2>
+                    <span class="step-duration">~10 min</span>
+                </div>
+            </div>
+            <div class="step-content">
+                <div class="step-description">
+                    <p>Make your data discoverable by adding metadata to every object. Snowflake's Data Catalog surfaces <code>COMMENT ON</code> descriptions in Snowsight so any user browsing the catalog understands what each table, view, and column represents.</p>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- =====================================================
+-- STEP 6: DOCUMENT & DESCRIBE
+-- Companion file: sql/06_documentation.sql
+-- =====================================================
+
+USE DATABASE BARCLAYS_HOL;
+
+-- 6.1: Document raw tables
+COMMENT ON TABLE RAW_DATA.PAYMENTS IS
+    'Raw inbound payment transactions. Source: payments processing system. Refreshed daily. Owner: Payments Operations.';
+
+COMMENT ON TABLE RAW_DATA.CUSTOMER_FEEDBACK IS
+    'Customer feedback on payment services collected across all channels. Owner: Customer Experience.';
+
+COMMENT ON TABLE RAW_DATA.SLA_DEFINITIONS IS
+    'SLA thresholds per payment type. Owner: Payments Operations.';
+
+COMMENT ON TABLE RAW_DATA.OPERATIONAL_ALERTS IS
+    'Operational alerts generated by the payments monitoring system. Owner: Payments Operations.';</code></pre>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- 6.2: Document key columns
+COMMENT ON COLUMN RAW_DATA.PAYMENTS.PAYMENT_TYPE       IS 'Payment scheme: SWIFT, BACS, CHAPS, Faster Payments, SEPA, Wire Transfer.';
+COMMENT ON COLUMN RAW_DATA.PAYMENTS.STATUS             IS 'Current status: COMPLETED, PENDING, FAILED, RETURNED.';
+COMMENT ON COLUMN RAW_DATA.PAYMENTS.PROCESSING_TIME_MS IS 'End-to-end processing time in milliseconds. Used for SLA compliance measurement.';
+COMMENT ON COLUMN RAW_DATA.PAYMENTS.AMOUNT             IS 'Payment amount in the transaction currency.';
+
+-- 6.3: Document dbt marts
+COMMENT ON TABLE ANALYTICS.MART_PAYMENT_KPIS IS
+    'dbt mart: daily payment KPIs by type and region. Built by Cortex Code. Includes success rates and P95 processing time.';
+
+COMMENT ON TABLE ANALYTICS.MART_SLA_COMPLIANCE IS
+    'dbt mart: daily SLA compliance status per payment type. Flags COMPLIANT, AT RISK, or BREACH against SLA_DEFINITIONS.';
+
+-- 6.4: Document AI-enriched table and analytics view
+COMMENT ON TABLE ANALYTICS.FEEDBACK_ENRICHED IS
+    'Cortex AI-enriched feedback. Includes SENTIMENT() scores and CLASSIFY_TEXT() topic categories.';
+
+COMMENT ON VIEW ANALYTICS.V_PAYMENTS_ANALYSIS IS
+    'Analytics view for Snowflake CoWork. Exposes dbt KPIs with time, type, and region dimensions. Source for SV_PAYMENTS_BARCLAYS.';</code></pre>
+                </div>
+
+                <div class="code-block" data-language="sql">
+                    <div class="code-header">
+                        <span class="code-language">SQL</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this)" title="Copy code"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
+                        </div>
+                    </div>
+                    <pre><code>-- 6.5: Verify comments visible in catalog
+SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE, COMMENT
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA IN ('RAW_DATA','ANALYTICS')
+  AND COMMENT IS NOT NULL
+ORDER BY TABLE_SCHEMA, TABLE_NAME;
+
+-- 6.6: Cleanup (run when finished)
+-- DROP DATABASE BARCLAYS_HOL;
+-- DROP WAREHOUSE BARCLAYS_WH;
+
+SELECT '✅ Lab complete - all objects documented in Snowsight Data Catalog' AS STATUS;</code></pre>
+                </div>
+
+                <div class="callout callout-success">
+                    <div class="callout-icon">&#127881;</div>
+                    <div class="callout-content">
+                        <strong class="callout-title">Lab Complete!</strong>
+                        <p>Navigate to <code>Data &rarr; Databases &rarr; BARCLAYS_HOL</code> in Snowsight and click any table. You'll see your comments displayed in the Data Catalog, making every object self-documenting.</p>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button class="btn-check" onclick="markStepComplete(6)">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                        Mark as complete
+                    </button>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <section class="completion-section" id="completionSection">
+        <div class="completion-container">
+            <div class="completion-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+            </div>
+            <h2>Congratulations!</h2>
+            <p>You've successfully completed the Barclays Data Product with Cortex AI Hands-On Lab.</p>
+            <div style="margin-top: 2rem; text-align: left;">
+                <h3 style="margin-bottom: 1rem;">What You Built</h3>
+                <ul style="padding-left: 1.5rem; line-height: 2;">
+                    <li>Used Cortex Code to scaffold and deploy a dbt transformation layer</li>
+                    <li>AI-enriched payments feedback using Cortex SENTIMENT and CLASSIFY_TEXT</li>
+                    <li>Real-time operational layer with Dynamic Tables (no orchestration needed)</li>
+                    <li>Natural language analytics via Semantic View + Cortex Analyst Agent</li>
+                    <li>Fully documented objects discoverable in the Snowflake Data Catalog</li>
+                </ul>
+                <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Next Steps</h3>
+                <ul style="padding-left: 1.5rem; line-height: 2;">
+                    <li>Publish to Snowflake Marketplace for cross-account sharing</li>
+                    <li>Add Cortex Search for unstructured document analysis</li>
+                    <li>Build a Streamlit dashboard for real-time monitoring</li>
+                    <li>Integrate with existing BUK/EDP data pipelines</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer class="hol-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <img src="https://www.logo.wine/a/logo/Snowflake_Inc./Snowflake_Inc.-Logo.wine.svg" alt="Snowflake" class="footer-logo">
+                <p>Snowflake Hands-On Labs</p>
+            </div>
+            <div class="footer-links">
+                <a href="https://docs.snowflake.com" target="_blank">Documentation</a>
+                <a href="https://community.snowflake.com" target="_blank">Community</a>
+                <a href="https://quickstarts.snowflake.com" target="_blank">More Labs</a>
+            </div>
+            <div class="footer-meta">
+                <p>&copy; 2026 Snowflake Inc.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+const HOLState = {
+    totalSteps: 6,
+    completedSteps: new Set(),
+    startTime: new Date(),
+    currentStep: 1
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadProgress();
+    updateProgressUI();
+});
+
+function markStepComplete(stepNumber) {
+    HOLState.completedSteps.add(stepNumber);
+    const stepCard = document.getElementById('step-' + stepNumber);
+    if (stepCard) {
+        stepCard.classList.add('completed');
+        const btn = stepCard.querySelector('.btn-check');
+        if (btn) {
+            btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg> Completed';
+            btn.disabled = true;
+            btn.style.background = 'var(--sf-green)';
+            btn.style.color = 'white';
+        }
+    }
+    const navItem = document.querySelector('.step-nav-item[data-step="' + stepNumber + '"]');
+    if (navItem) navItem.classList.add('completed');
+    saveProgress();
+    updateProgressUI();
+    if (HOLState.completedSteps.size === HOLState.totalSteps) {
+        document.getElementById('completionSection').classList.add('visible');
+        document.getElementById('completionSection').scrollIntoView({ behavior: 'smooth' });
+    } else if (stepNumber < HOLState.totalSteps) {
+        setTimeout(function() { scrollToStep(stepNumber + 1); }, 500);
+    }
+}
+
+function updateProgressUI() {
+    var progress = (HOLState.completedSteps.size / HOLState.totalSteps) * 100;
+    var progressFill = document.getElementById('progressFill');
+    if (progressFill) progressFill.style.width = progress + '%';
+    var progressPercent = document.querySelector('.progress-percent');
+    if (progressPercent) progressPercent.textContent = Math.round(progress) + '%';
+}
+
+function saveProgress() {
+    var data = { completedSteps: Array.from(HOLState.completedSteps), startTime: HOLState.startTime.toISOString() };
+    localStorage.setItem('hol-progress-barclays-data-product-cortex', JSON.stringify(data));
+}
+
+function loadProgress() {
+    var saved = localStorage.getItem('hol-progress-barclays-data-product-cortex');
+    if (saved) {
+        try {
+            var data = JSON.parse(saved);
+            data.completedSteps.forEach(function(step) {
+                HOLState.completedSteps.add(step);
+                var stepCard = document.getElementById('step-' + step);
+                if (stepCard) stepCard.classList.add('completed');
+                var navItem = document.querySelector('.step-nav-item[data-step="' + step + '"]');
+                if (navItem) navItem.classList.add('completed');
+            });
+        } catch (e) {}
+    }
+}
+
+function scrollToStep(stepNumber) {
+    var el = document.getElementById('step-' + stepNumber);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleStep(header) {
+    var content = header.nextElementSibling;
+    if (content) content.classList.toggle('collapsed');
+}
+
+function copyCode(button) {
+    var codeBlock = button.closest('.code-block');
+    var code = codeBlock.querySelector('code');
+    navigator.clipboard.writeText(code.textContent).then(function() {
+        button.style.color = 'var(--sf-green)';
+        setTimeout(function() { button.style.color = ''; }, 2000);
+    });
+}
+
+function resetProgress() {
+    localStorage.removeItem('hol-progress-barclays-data-product-cortex');
+    HOLState.completedSteps.clear();
+    document.querySelectorAll('.step-card').forEach(function(card) { card.classList.remove('completed'); });
+    document.querySelectorAll('.step-nav-item').forEach(function(nav) { nav.classList.remove('completed'); });
+    document.querySelectorAll('.btn-check').forEach(function(btn) {
+        btn.disabled = false;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg> Mark as complete';
+    });
+    document.getElementById('completionSection').classList.remove('visible');
+    updateProgressUI();
+}
+    </script>
+</body>
+</html>

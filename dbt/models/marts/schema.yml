@@ -1,0 +1,30 @@
+-- models/marts/schema.yml
+version: 2
+
+models:
+  - name: mart_payment_kpis
+    description: >
+      Daily payment KPIs aggregated by payment type and region.
+      Includes success rates, volume, and processing time percentiles.
+      Built from stg_payments using dbt.
+    columns:
+      - name: payment_day
+        tests: [not_null]
+      - name: payment_type
+        tests: [not_null]
+      - name: total_payments
+        tests: [not_null]
+      - name: success_rate_pct
+        description: Percentage of payments with COMPLETED status. Used for SLA compliance.
+        tests: [not_null]
+
+  - name: mart_sla_compliance
+    description: >
+      Daily SLA compliance status per payment type.
+      Joins mart_payment_kpis against SLA_DEFINITIONS thresholds.
+      Flags each day/type as COMPLIANT, AT RISK, or BREACH.
+    columns:
+      - name: sla_status
+        tests:
+          - accepted_values:
+              values: ['COMPLIANT','AT RISK','BREACH']
