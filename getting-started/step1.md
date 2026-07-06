@@ -42,6 +42,19 @@ The lab guide has 6 steps. Work through them sequentially — each step builds o
 | 5 | Snowflake CoWork (Cortex Analyst) | ~15 min |
 | 6 | Document & Describe | ~10 min |
 
+## SQL Scripts (reference)
+
+All SQL is embedded in the lab guide above, but you can also access the scripts directly:
+
+| Step | Script |
+|------|--------|
+| 1. Setup | [01_setup.sql](https://github.com/gemmamcginlay-sf/barclays-hol/blob/main/sql/01_setup.sql) |
+| 2. Load Data | [02_load_data.sql](https://github.com/gemmamcginlay-sf/barclays-hol/blob/main/sql/02_load_data.sql) |
+| 3. Validate dbt | [03_validate_dbt.sql](https://github.com/gemmamcginlay-sf/barclays-hol/blob/main/sql/03_validate_dbt.sql) |
+| 4. Cortex AI + DTs | [04_cortex_ai.sql](https://github.com/gemmamcginlay-sf/barclays-hol/blob/main/sql/04_cortex_ai.sql) |
+| 5. CoWork | [05_intelligence.sql](https://github.com/gemmamcginlay-sf/barclays-hol/blob/main/sql/05_intelligence.sql) |
+| 6. Documentation | [06_documentation.sql](https://github.com/gemmamcginlay-sf/barclays-hol/blob/main/sql/06_documentation.sql) |
+
 ---
 
 ## Need help?
