@@ -1,5 +1,4 @@
 -- models/staging/stg_payments.sql
--- Generated with Cortex Code
 -- Cleans and type-casts the raw PAYMENTS table
 
 WITH source AS (
@@ -10,16 +9,18 @@ SELECT
     PAYMENT_ID,
     PAYMENT_DATE::TIMESTAMP                             AS PAYMENT_DATE,
     DATE_TRUNC('DAY', PAYMENT_DATE::TIMESTAMP)          AS PAYMENT_DAY,
-    UPPER(TRIM(ORIGINATOR_NAME))                        AS ORIGINATOR_NAME,
-    UPPER(TRIM(BENEFICIARY_NAME))                       AS BENEFICIARY_NAME,
+    ORIGINATOR_ACCOUNT_ID,
+    BENEFICIARY_ACCOUNT_ID,
     UPPER(TRIM(PAYMENT_TYPE))                           AS PAYMENT_TYPE,
     UPPER(TRIM(CHANNEL))                                AS CHANNEL,
     UPPER(TRIM(CURRENCY))                               AS CURRENCY,
     AMOUNT::NUMBER(15,2)                                AS AMOUNT,
+    FX_RATE,
     UPPER(TRIM(STATUS))                                 AS STATUS,
     PROCESSING_TIME_MS::NUMBER                          AS PROCESSING_TIME_MS,
     ERROR_CODE,
     UPPER(TRIM(REGION))                                 AS REGION,
+    SETTLEMENT_DATE,
 
     -- Derived flags
     CASE WHEN STATUS = 'COMPLETED' THEN TRUE ELSE FALSE END  AS IS_SUCCESSFUL,
