@@ -31,4 +31,8 @@ USE SCHEMA RAW_DATA;
 -- Verify Cortex AI is available
 SELECT SNOWFLAKE.CORTEX.SENTIMENT('Payment processed successfully') AS cortex_test;
 
+-- Show available compute pools (needed for Streamlit app in Step 7)
+-- Note the pool name — you'll set it in App Settings when you run the dashboard
+SHOW COMPUTE POOLS;
+
 SELECT '✅ Setup complete' AS STATUS;

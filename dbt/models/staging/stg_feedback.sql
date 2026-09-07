@@ -1,5 +1,4 @@
 -- models/staging/stg_feedback.sql
--- Generated with Cortex Code
 -- Cleans and type-casts the raw CUSTOMER_FEEDBACK table
 
 WITH source AS (
@@ -10,9 +9,10 @@ SELECT
     FEEDBACK_ID,
     FEEDBACK_DATE::TIMESTAMP            AS FEEDBACK_DATE,
     DATE_TRUNC('DAY', FEEDBACK_DATE)    AS FEEDBACK_DAY,
-    UPPER(TRIM(CUSTOMER_NAME))          AS CUSTOMER_NAME,
+    CUSTOMER_ID,
+    PAYMENT_ID,
     UPPER(TRIM(FEEDBACK_CHANNEL))       AS FEEDBACK_CHANNEL,
-    TRIM(FEEDBACK_TEXT)                 AS FEEDBACK_TEXT,
+    TRIM(FEEDBACK_TEXT)                  AS FEEDBACK_TEXT,
     UPPER(TRIM(PAYMENT_TYPE))           AS PAYMENT_TYPE,
     RATING::NUMBER(1)                   AS RATING,
 
