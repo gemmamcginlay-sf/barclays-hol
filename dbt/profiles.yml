@@ -1,0 +1,10 @@
+barclays_payments:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      role: ACCOUNTADMIN
+      database: BARCLAYS_HOL
+      warehouse: BARCLAYS_WH
+      schema: ANALYTICS
+      threads: 4
